@@ -4,8 +4,10 @@ import random
 
 import discord
 from discord.ext import commands
+
 from dotenv import load_dotenv
 
+from music_cog import MusicCog
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -15,6 +17,8 @@ GUILD = os.getenv('DISCORD_GUILD')
 intents = discord.Intents.all()
 activity = discord.Activity(type=discord.ActivityType.playing, name='with code')
 bot = commands.Bot(command_prefix='!', intents=intents, activity=activity)
+
+bot.add_cog(MusicCog(bot))
 
 
 @bot.event
@@ -81,6 +85,10 @@ async def create_channel(ctx, channel_name='test-channel'):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
+    else:
+        await ctx.send(error)
+        # print(error)
+        # raise error
 
 
 # @bot.event
