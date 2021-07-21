@@ -1,7 +1,17 @@
 import discord
 from discord.ext import commands
+from discord import FFmpegPCMAudio
 
 from youtube_dl import YoutubeDL
+
+
+YDL_OPTIONS = {
+    "default_search": "ytsearch",
+    "format": "bestaudio/best",
+    "quiet": True,
+    "extract_flat": "in_playlist"
+}
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 
 async def in_voice_channel(ctx):
@@ -38,4 +48,34 @@ class MusicCog(commands.Cog):
             await voice.disconnect()
         else:
             await ctx.send('Not connected to voice channel')
+
+    @staticmethod
+    def get_ydl_url(url_or_search):
+        with YoutubeDL(YDL_OPTIONS) as ydl:
+            info = ydl.extract_info(url_or_search, download=False)
+        if "_type" in info and info["_type"] == "playlist":
+            return MusicCog.get_ydl_url(info["entries"][0]["url"])
+        else:
+            ydl_url = info['url']
+        return ydl_url
+
+    @commands.command()
+    async def play(self, ctx, *, url_or_search):
+        print('play invoked!')
+        # url_or_search = ' '.join(url_or_search)
+        print(url_or_search)
+
+        author_voice = ctx.message.author.voice
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        if author_voice and (not voice or not voice.is_connected()):
+            await self.join(ctx)
+
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+
+        if not voice.is_playing():
+            ydl_url = MusicCog.get_ydl_url(url_or_search)
+            print(ydl_url)
+            voice.play(FFmpegPCMAudio(ydl_url, **FFMPEG_OPTIONS))
+            print(voice.is_playing())
+            await ctx.send('Bot is playing')
 

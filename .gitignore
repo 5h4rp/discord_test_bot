@@ -2,3 +2,4 @@
 .env
 .idea
 err.log
+ffmpeg.exe
