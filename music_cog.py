@@ -26,6 +26,7 @@ async def in_voice_channel(ctx):
 class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.queue = []
 
     @commands.command()
     async def join(self, ctx):
@@ -75,7 +76,17 @@ class MusicCog(commands.Cog):
         if not voice.is_playing():
             ydl_url = MusicCog.get_ydl_url(url_or_search)
             print(ydl_url)
-            voice.play(FFmpegPCMAudio(ydl_url, **FFMPEG_OPTIONS))
+            voice.play(FFmpegPCMAudio(ydl_url, **FFMPEG_OPTIONS), after=lambda e: print('finished playing'))
             print(voice.is_playing())
             await ctx.send('Bot is playing')
+        else:
+            self.queue.append(url_or_search)
 
+    @commands.command()
+    async def stop(self, ctx):
+        print('stop invoked!')
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice.is_playing():
+            voice.stop()
+            await ctx.send('Stopping...')
