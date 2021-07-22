@@ -26,16 +26,29 @@ async def in_voice_channel(ctx):
 class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.is_playing = False
         self.queue = []
 
+    @staticmethod
+    async def is_joined(voice, author_voice):
+        action = 'invalid'
+        if author_voice and voice and voice.is_connected():
+            action = 'move'
+        elif author_voice:
+            action = 'join'
+
+        return action
+
     @commands.command()
-    async def join(self, ctx):
+    async def join(self, ctx, action=None):
+        print(action)
         print('join invoked!')
         author_voice = ctx.message.author.voice
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-        if author_voice and voice and voice.is_connected():
+        action = MusicCog.is_joined(voice, author_voice) if action is None or action not in ('move', 'join') else action
+        if action == 'move':
             await voice.move_to(author_voice.channel)
-        elif author_voice:
+        elif action == 'join':
             await author_voice.channel.connect()
         else:
             await ctx.send('User not connected to any voice channel')
@@ -57,11 +70,44 @@ class MusicCog(commands.Cog):
         if "_type" in info and info["_type"] == "playlist":
             return MusicCog.get_ydl_url(info["entries"][0]["url"])
         else:
+            # print(info['title'])
+            ydl_title = info['title']
             ydl_url = info['url']
-        return ydl_url
+        return ydl_title, ydl_url
 
-    @commands.command()
-    async def play(self, ctx, *, url_or_search):
+    # async def play_next(self):
+    #     if len(self.queue) > 0:
+    #         self.is_playing = True
+    #
+    #         # get the first url
+    #         m_url = self.queue[0][0]['source']
+    #
+    #         # remove the first element as you are currently playing it
+    #         self.queue.pop(0)
+    #
+    #         self.bot.voice_clients.play(discord.FFmpegPCMAudio(m_url, **FFMPEG_OPTIONS), after=lambda e: self.play_next())
+    #     else:
+    #         self.is_playing = False
+
+    # async def play_music(self):
+    #     if len(self.queue) > 0:
+    #         self.is_playing = True
+    #
+    #         m_url = self.queue[0][0]['source']
+    #
+    #         # try to connect to voice channel if you are not already connected
+    #         voice, author_voice, action = self.is_joined()
+    #
+    #         print(self.queue)
+    #         # remove the first element as you are currently playing it
+    #         self.queue.pop(0)
+    #
+    #         self.vc.play(discord.FFmpegPCMAudio(m_url, **FFMPEG_OPTIONS), after=lambda e: self.play_next())
+    #     else:
+    #         self.is_playing = False
+
+    @commands.command(name='play')
+    async def play_command(self, ctx, *, url_or_search):
         print('play invoked!')
         # url_or_search = ' '.join(url_or_search)
         print(url_or_search)
@@ -88,5 +134,6 @@ class MusicCog(commands.Cog):
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
         if voice.is_playing():
+            self.queue = list()
             voice.stop()
             await ctx.send('Stopping...')
