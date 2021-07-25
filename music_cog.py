@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord import FFmpegPCMAudio
+# from discord import FFmpegPCMAudio
 
 from youtube_dl import YoutubeDL
 
@@ -80,7 +80,7 @@ class MusicCog(commands.Cog):
             ydl_url = info['url']
         return ydl_title, ydl_url
 
-    async def play_next(self, guild):
+    def play_next(self, guild):
         if len(self.queue) > 0:
             self.is_playing = True
 
