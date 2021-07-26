@@ -121,6 +121,7 @@ class MusicCog(commands.Cog):
         self.queue.append(music_data)
         if not self.is_playing:
             await self.play_music(ctx.guild)
+            await ctx.send('Playing...')
         else:
             await ctx.send('Music added to queue')
 
@@ -133,3 +134,21 @@ class MusicCog(commands.Cog):
             self.queue = list()
             voice.stop()
             await ctx.send('Stopping...')
+
+    @commands.command()
+    async def skip(self, ctx):
+        print('skip invoked!')
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice.is_playing():
+            voice.stop()
+            await ctx.send('Skipping...')
+
+    @commands.command()
+    async def queue(self, ctx):
+        print('queue invoked!')
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice.is_playing():
+            queue_list = ''.join([f'{sno}. {q_item[0]}\n' for sno, q_item in zip(range(1, len(self.queue)+1), self.queue)])
+            await ctx.send(queue_list)
