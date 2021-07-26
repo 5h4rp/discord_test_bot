@@ -150,5 +150,10 @@ class MusicCog(commands.Cog):
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
         if voice.is_playing():
-            queue_list = ''.join([f'{sno}. {q_item[0]}\n' for sno, q_item in zip(range(1, len(self.queue)+1), self.queue)])
-            await ctx.send(queue_list)
+            if len(self.queue) > 0:
+                queue_list = ''.join([f'{sno}. {q_item[0]}\n' for sno, q_item in enumerate(self.queue)])
+                await ctx.send(queue_list)
+            else:
+                await ctx.send('Nothing in queue.')
+        else:
+            await ctx.send('Not playing any music')
