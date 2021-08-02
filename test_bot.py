@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from music_cog import MusicCog
 from misc_cog import MiscCog
+from tic_tac_toe_cog import TicTacToeCog
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -21,6 +22,7 @@ bot = commands.Bot(command_prefix='!', intents=intents, activity=activity)
 
 bot.add_cog(MusicCog(bot))
 bot.add_cog(MiscCog(bot))
+bot.add_cog(TicTacToeCog(bot))
 
 
 @bot.event
