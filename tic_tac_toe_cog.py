@@ -33,6 +33,7 @@ class TicTacToeCog(commands.Cog):
 
     @commands.command(name="tictactoe")
     async def tic_tac_toe(self, ctx):
+        print('tictactoe invoked!')
         self.board = format_board(BOARD)
         board = await ctx.send(self.board)
         for emoji in NUMS.values():
